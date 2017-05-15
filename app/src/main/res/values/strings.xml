@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Seminar Token</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_password">Senha</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_field_required">Campo obrigatório</string>
+    <string name="title_activity_student">Seminar Token - Aluno</string>
+    <string name="title_activity_teacher">Seminar Token - Professor</string>
+    <string name="title_activity_register_student">Registro de Aluno</string>
+    <string name="title_activity_register_presence">RegisterPresence</string>
+</resources>
