@@ -19,52 +19,10 @@ import java.util.List;
  * Created by gui on 14/05/2017.
  */
 
-
-class Seminar {
-    String id;
-    String name;
-    String data;
-
-    Seminar(String id, String name, String data) {
-        this.id = id;
-        this.name = name;
-        this.data = data;
-    }
-}
-
-class SeminarInfoTask extends AsyncTask<Void, Void, Boolean> {
-
-    String mId;
-    JSONObject jObj;
-
-    SeminarInfoTask(String id) {
-        mId = id;
-    }
-
-    @Override
-    protected Boolean doInBackground(Void... args) {
-
-        jObj = WebService.get("seminar/get/" + mId);
-
-        try {
-            if((Boolean) jObj.get("success")) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-}
-
 class SeminarListTask extends AsyncTask<Void, Void, Boolean> {
 
     JSONObject jObj;
     List<Seminar> seminars = null;
-    Boolean success = false;
 
     List<Seminar> getList(){
         return seminars;

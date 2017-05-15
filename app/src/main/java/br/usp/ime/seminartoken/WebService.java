@@ -1,5 +1,6 @@
 package br.usp.ime.seminartoken;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -139,5 +140,88 @@ class WebService {
         }
 
         return jObj;
+    }
+}
+
+class SimpleGetTask extends AsyncTask<Void, Void, Boolean> {
+
+    private String path;
+    private JSONObject jObj = null;
+    private User user = null;
+
+    SimpleGetTask(String path) {
+        this.path = path;
+    }
+
+    @Override
+    protected Boolean doInBackground(Void... args) {
+
+        jObj = WebService.get(path);
+
+        try {
+            if((Boolean) jObj.get("success")) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    User parseUser(){
+        if (jObj == null) return null;
+        try {
+            jObj = (JSONObject) jObj.get("data");
+            String nusp = jObj.get("nusp").toString();
+            String name = jObj.get("name").toString();
+            String pass = jObj.get("pass").toString();
+            user = new User(nusp, name, pass);
+            return user;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    Seminar parseSeminar() {
+        if (jObj == null) return null;
+        try {
+            String id = jObj.get("id").toString();
+            String name = jObj.get("name").toString();
+            String data = jObj.get("data").toString();
+            return new Seminar(id, name, data);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+}
+
+class User {
+    String nusp;
+    String name;
+    String pass;
+
+    User(String nusp, String name, String pass) {
+        this.nusp = nusp;
+        this.name = name;
+        this.pass = pass;
+    }
+}
+
+class Seminar {
+    String id;
+    String name;
+    String data;
+
+    Seminar(String id, String name, String data) {
+        this.id = id;
+        this.name = name;
+        this.data = data;
     }
 }

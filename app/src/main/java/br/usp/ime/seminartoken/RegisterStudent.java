@@ -53,7 +53,8 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private UserAddTask mAuthTask = null;
+    private UserRegistryTask mAuthTask = null;
+    private UserEditTask mEditTask = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -61,6 +62,7 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
     private EditText mNameView;
     private View mProgressView;
     private View mLoginFormView;
+    Boolean edit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,9 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
         Bundle b = getIntent().getExtras();
         String nusp = b.getString("nusp");
         String pass = b.getString("pass");
+        String name = b.getString("name");
+        edit = b.getBoolean("edit");
+        Log.d("edit", edit.toString());
 
         setContentView(R.layout.activity_register_student);
         setupActionBar();
@@ -90,6 +95,9 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
         });
 
         mNameView = (EditText) findViewById(R.id.name);
+        if (name != "") {
+            mNameView.setText(name, TextView.BufferType.EDITABLE);
+        }
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
@@ -121,7 +129,7 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
+        if (mAuthTask != null || mEditTask != null) {
             return;
         }
 
@@ -139,7 +147,7 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
 
         // Check for a valid password, if the user entered one.
         if (TextUtils.isEmpty(password)) {
-            mPasswordView.setError("humm");
+            mPasswordView.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
             cancel = true;
         }
@@ -169,8 +177,14 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserAddTask(email, name, password);
-            mAuthTask.execute((Void) null);
+            if (edit) {
+                mEditTask = new UserEditTask(email, name, password);
+                mEditTask.execute((Void) null);
+            } else {
+                mAuthTask = new UserRegistryTask(email, name, password);
+                mAuthTask.execute((Void) null);
+            }
+
         }
     }
 
@@ -265,16 +279,21 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserAddTask extends AsyncTask<Void, Void, Boolean> {
+    class UserRegistryTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mNusp;
         private final String mPass;
         private final String mName;
+        private String path = "student/add";
 
-        UserAddTask(String username, String name, String password) {
+        UserRegistryTask(String username, String name, String password) {
             mNusp = username;
             mName = name;
             mPass = password;
+        }
+
+        void setPath(String path){
+            this.path = path;
         }
 
         @Override
@@ -286,13 +305,18 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
             params.put("pass", mPass);
 
             JSONObject jObj = null;
-            jObj = WebService.post("student/add", params);
+            Log.d("pathSuper", path);
+            jObj = WebService.post(path, params);
+            Log.d("json", jObj.toString());
 
             try {
                 if((Boolean) jObj.get("success")) {
                     // Manda para atividade do professor
-                    Log.d("Add", "student");
                     Intent intent = new Intent(RegisterStudent.this, StudentActivity.class);
+                    Bundle b = new Bundle();
+                    b.putString("nusp", mNusp);
+                    b.putString("pass", mPass);
+                    intent.putExtras(b);
                     startActivity(intent);
                     return true;
                 }
@@ -308,6 +332,7 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
+            mEditTask = null;
             showProgress(false);
 
             if (success) {
@@ -321,8 +346,18 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
         @Override
         protected void onCancelled() {
             mAuthTask = null;
+            mEditTask = null;
             showProgress(false);
         }
     }
-}
 
+    private class UserEditTask extends UserRegistryTask {
+
+
+        UserEditTask(String username, String name, String password) {
+            super(username, name, password);
+            setPath("student/edit");
+        }
+    }
+
+}

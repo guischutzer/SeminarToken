@@ -60,7 +60,11 @@
                 android:value="br.usp.ime.seminartoken.StudentActivity" />
         </activity>
         <activity android:name=".SearchSeminar" />
-        <activity android:name=".SeminarInfo"></activity>
+        <activity android:name=".SeminarInfo" />
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

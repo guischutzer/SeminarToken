@@ -20,7 +20,7 @@ public class SearchSeminar extends AppCompatActivity {
 
     EditText text;
 
-    private SeminarInfoTask seminarTask = null;
+    private SimpleGetTask seminarTask = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +57,7 @@ public class SearchSeminar extends AppCompatActivity {
         if (cancel) {
             focusView.requestFocus();
         } else {
-            seminarTask = new SeminarInfoTask(id);
+            seminarTask = new SimpleGetTask("seminar/get/" + id);
             Boolean success = false;
             success = seminarTask.execute((Void) null).get();
             if (success) {
