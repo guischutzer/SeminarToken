@@ -10,8 +10,44 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 
 public class TeacherActivity extends StudentActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent,
+                                    View view,
+                                    int position,
+                                    long id) {
+                String item = (String) list.getItemAtPosition(position);
+                String[] sp = item.split(":");
+                String seminarId = sp[0];
+
+                SimpleGetTask getTask = new SimpleGetTask("seminar/get/" + seminarId);
+                getTask.execute((Void) null);
+
+                Seminar seminar = null;
+                while (seminar == null) {
+                    seminar = getTask.parseSeminar();
+                }
+
+                Intent intent = new Intent(TeacherActivity.this, SeminarInfo.class);
+                Bundle b = new Bundle();
+                b.putString("id", seminarId);
+                b.putString("name", seminar.name);
+                b.putString("nusp", nusp);
+
+                intent.putExtras(b);
+                startActivity(intent);
+            }
+        });
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -39,6 +75,7 @@ public class TeacherActivity extends StudentActivity {
                 b.putString("nusp", nusp);
                 b.putString("pass", pass);
                 b.putBoolean("edit", true);
+                b.putString("type", "seminar");
 
                 SimpleGetTask getTeacher = new SimpleGetTask("teacher/get/" + nusp);
                 getTeacher.execute((Void) null);
@@ -58,7 +95,8 @@ public class TeacherActivity extends StudentActivity {
                 intent = new Intent(TeacherActivity.this, RegisterSeminar.class);
 
                 b = new Bundle();
-                b.putString("nusp", "seminar");
+                b.putString("type", "seminar");
+                b.putString("nusp", nusp);
                 b.putString("pass", "");
                 b.putString("name", "");
                 b.putBoolean("edit", false);
@@ -75,6 +113,7 @@ public class TeacherActivity extends StudentActivity {
                 b.putString("nusp", "");
                 b.putString("pass", "");
                 b.putString("name", "");
+                b.putString("type", "teacher");
                 b.putBoolean("edit", false);
 
                 intent.putExtras(b);

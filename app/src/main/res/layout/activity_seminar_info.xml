@@ -6,4 +6,53 @@
     android:layout_height="match_parent"
     tools:context="br.usp.ime.seminartoken.SeminarInfo">
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="368dp"
+        android:layout_height="229dp"
+        android:text="TextView"
+        tools:layout_editor_absoluteX="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/list_students"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp" />
+
+    <Button
+        android:id="@+id/list_students"
+        android:layout_width="368dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Listar Alunos"
+        app:layout_constraintBottom_toTopOf="@+id/send_attendence"
+        tools:layout_editor_absoluteX="8dp" />
+
+    <Button
+        android:id="@+id/send_attendence"
+        android:layout_width="368dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="7dp"
+        android:text="Buscar Confirmaçao de Presenca"
+        app:layout_constraintBottom_toTopOf="@+id/alter"
+        tools:layout_editor_absoluteX="8dp" />
+
+    <Button
+        android:id="@+id/remove"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="368dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Remover Seminario"
+        android:theme="@style/RedButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:layout_editor_absoluteX="8dp" />
+
+    <Button
+        android:id="@+id/alter"
+        android:layout_width="368dp"
+        android:layout_height="wrap_content"
+        android:text="Alterar Seminario"
+        tools:layout_editor_absoluteX="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/remove" />
+
 </android.support.constraint.ConstraintLayout>

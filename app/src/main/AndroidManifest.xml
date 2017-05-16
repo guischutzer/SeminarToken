@@ -41,21 +41,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="br.usp.ime.seminartoken.LoginActivity" />
         </activity>
-        <activity
-            android:name=".RegisterPresence"
-            android:label="@string/title_activity_register_presence"
-            android:parentActivityName=".StudentActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="br.usp.ime.seminartoken.StudentActivity" />
-        </activity>
+
         <activity android:name=".SearchSeminar" />
         <activity android:name=".SeminarInfo" />
         <activity
             android:name=".TeacherActivity"
             android:label="@string/title_activity_teacher"
-            android:parentActivityName=".LoginActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -68,6 +59,15 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".UserInfo" />
         <activity android:name=".RegisterSeminar"></activity>
+        <activity
+            android:name=".SeminarInfoStudent"
+            android:label="Informacoes do Seminario"
+            android:parentActivityName=".StudentActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="br.usp.ime.seminartoken.StudentActivity" />
+        </activity>
     </application>
 
 </manifest>

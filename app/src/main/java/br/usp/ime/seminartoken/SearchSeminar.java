@@ -18,18 +18,37 @@ import java.util.concurrent.ExecutionException;
 
 public class SearchSeminar extends SearchActivity {
 
-    SearchSeminar(){
+    public SearchSeminar(){
         super("seminar");
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getSuccess()) {
-            Intent intent = new Intent(SearchSeminar.this, SeminarInfo.class);
-            Bundle b = new Bundle();
-            intent.putExtras(b);
-            startActivity(intent);
-        }
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    if (attemptSearch()) {
+                        Seminar seminar = getSeminar();
+                        Intent intent = new Intent(SearchSeminar.this, SeminarInfo.class);
+                        Bundle b = new Bundle();
+
+                        Log.d("SearchResult", seminar.id + " " + seminar.name + " " + seminar.data);
+                        b.putString("id", seminar.id);
+                        b.putString("name", seminar.name);
+                        b.putString("data", seminar.data);
+                        intent.putExtras(b);
+
+                        startActivity(intent);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
     }
 }

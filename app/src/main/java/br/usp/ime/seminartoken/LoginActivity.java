@@ -263,6 +263,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     Bundle b = new Bundle();
                     b.putString("nusp", mNusp);
                     b.putString("pass", mPass);
+                    b.putString("type", "seminar");
+
                     intent.putExtras(b);
                     startActivity(intent);
                     return true;
@@ -276,6 +278,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         b.putString("nusp", mNusp);
                         b.putString("pass", mPass);
                         b.putBoolean("edit", false);
+                        b.putString("type", "seminar");
+
                         intent.putExtras(b);
                         startActivity(intent);
                         return true;

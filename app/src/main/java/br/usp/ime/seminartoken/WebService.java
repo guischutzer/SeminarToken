@@ -78,20 +78,26 @@ class WebService {
     }
 
     static JSONObject post(String suffix, HashMap<String, String> params) {
+
         HttpURLConnection connection = null;
         StringBuilder result = null;
         JSONObject jObj = null;
         URL url = null;
         DataOutputStream outstream;
         StringBuilder sbParams = new StringBuilder();
+
         int i = 0;
         for (String key : params.keySet()) {
             try {
                 if (i != 0){
                     sbParams.append("&");
                 }
+                String value = params.get(key);
+                if (value == null) {
+                    value = "null";
+                }
                 sbParams.append(key).append("=")
-                        .append(URLEncoder.encode(params.get(key), "UTF-8"));
+                        .append(URLEncoder.encode(value, "UTF-8"));
 
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
@@ -205,11 +211,71 @@ class SimpleGetTask extends AsyncTask<Void, Void, Boolean> {
 
 }
 
+class SimplePostTask extends AsyncTask<Void, Void, Boolean> {
+
+    private String path;
+    private JSONObject jObj = null;
+    HashMap<String, String> params;
+
+    SimplePostTask(String path, HashMap<String, String> params) {
+        this.params = params;
+        this.path = path;
+    }
+
+    @Override
+    protected Boolean doInBackground(Void... args) {
+
+        jObj = WebService.post(path, params);
+
+        try {
+            if((Boolean) jObj.get("success")) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    User parseUser(){
+        if (jObj == null) return null;
+        try {
+            jObj = (JSONObject) jObj.get("data");
+            String nusp = jObj.get("nusp").toString();
+            String name = jObj.get("name").toString();
+            String pass = jObj.get("pass").toString();
+            return new User(nusp, name, pass);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    Seminar parseSeminar() {
+        if (jObj == null) return null;
+        try {
+            jObj = (JSONObject) jObj.get("data");
+            String id = jObj.get("id").toString();
+            String name = jObj.get("name").toString();
+            String data = jObj.get("data").toString();
+            return new Seminar(id, name, data);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+}
+
 class GetListTask extends AsyncTask<Void, Void, Boolean> {
 
     JSONObject jObj;
     List<Seminar> seminars = null;
     List<User> users = null;
+    List<Attendence> atts = null;
     String path = null;
 
     GetListTask(String path) {
@@ -222,6 +288,7 @@ class GetListTask extends AsyncTask<Void, Void, Boolean> {
     List<User> getUserList(){
         return users;
     }
+    List<Attendence> getAttendenceList() {return atts;}
 
     List<Seminar> parseSeminars(JSONObject jObj) {
         JSONArray data = null;
@@ -277,6 +344,35 @@ class GetListTask extends AsyncTask<Void, Void, Boolean> {
         return users;
     }
 
+    List<Attendence> parseAttendences(JSONObject jObj) {
+        JSONArray data = null;
+        try {
+            data = (JSONArray) jObj.get("data");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        List<Attendence> atts = new ArrayList<Attendence>();
+
+        try {
+            int length = data.length();
+            for (int i = 0; i < length; i++) {
+                JSONObject jAtt = (JSONObject) data.get(i);
+                Attendence att  = new Attendence(jAtt.get("student_nusp").toString(),
+                                                 jAtt.get("seminar_id").toString(),
+                                                 jAtt.get("data").toString(),
+                                                 jAtt.get("confirmed").toString(),
+                                                 jAtt.get("dateTime").toString());
+                atts.add(att);
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return atts;
+    }
+
     @Override
     protected Boolean doInBackground(Void... args) {
 
@@ -286,6 +382,8 @@ class GetListTask extends AsyncTask<Void, Void, Boolean> {
             if((Boolean) jObj.get("success")) {
                 if (path.equals("seminar")) {
                     seminars = parseSeminars(jObj);
+                } else if (path.startsWith("attendence")) {
+                    atts = parseAttendences(jObj);
                 }
                 else {
                     users = parseUsers(jObj);
@@ -301,6 +399,43 @@ class GetListTask extends AsyncTask<Void, Void, Boolean> {
         return false;
     }
 
+}
+
+class PostListTask extends GetListTask {
+
+    HashMap<String, String> params;
+
+    PostListTask(String type, HashMap<String, String> params){
+        super(type);
+        this.params = params;
+    }
+
+    @Override
+    protected Boolean doInBackground(Void... args){
+
+        jObj = WebService.post(path, params);
+
+        try {
+            if((Boolean) jObj.get("success")) {
+                if (path.equals("seminar")) {
+                    seminars = parseSeminars(jObj);
+                }
+                else if (path.startsWith("attendence")) {
+                    atts = parseAttendences(jObj);
+                }
+                else {
+                    users = parseUsers(jObj);
+                }
+                return true;
+            } else {
+                return false;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }
 
 class User {
@@ -324,6 +459,22 @@ class Seminar {
         this.id = id;
         this.name = name;
         this.data = data;
+    }
+}
+
+class Attendence {
+    String student_nusp;
+    String seminar_id;
+    String data;
+    String confirmed;
+    String dateTime;
+
+    Attendence(String student_nusp, String seminar_id, String data, String confirmed, String dateTime) {
+        this.seminar_id = seminar_id;
+        this.student_nusp = student_nusp;
+        this.data = data;
+        this.confirmed = confirmed;
+        this.dateTime = dateTime;
     }
 }
 

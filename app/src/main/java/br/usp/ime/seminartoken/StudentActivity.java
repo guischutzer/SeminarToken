@@ -76,7 +76,7 @@ public class StudentActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        DisplayList("seminar");
+        DisplayList(type);
 
         Bundle b = getIntent().getExtras();
         nusp = b.getString("nusp");
@@ -91,11 +91,23 @@ public class StudentActivity extends ListActivity {
                                     long id) {
                 String item = (String) list.getItemAtPosition(position);
                 String[] sp = item.split(":");
-                int seminarId = Integer.parseInt(sp[0]);
+                String seminarId = sp[0];
 
-                Intent intent = new Intent(StudentActivity.this, RegisterPresence.class);
+                SimpleGetTask getTask = new SimpleGetTask("seminar/get/" + seminarId);
+                getTask.execute((Void) null);
+
+                Seminar seminar = null;
+                while (seminar == null) {
+                    seminar = getTask.parseSeminar();
+                }
+
+
+                Intent intent = new Intent(StudentActivity.this, SeminarInfoStudent.class);
                 Bundle b = new Bundle();
-                b.putInt("id", seminarId);
+                b.putString("id", seminarId);
+                b.putString("name", seminar.name);
+                b.putString("nusp", nusp);
+
                 intent.putExtras(b);
                 startActivity(intent);
             }

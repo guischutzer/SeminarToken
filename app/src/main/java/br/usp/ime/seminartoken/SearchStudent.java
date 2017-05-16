@@ -16,7 +16,7 @@ public class SearchStudent extends SearchActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getSuccess()) {
+        if (success) {
             Intent intent = new Intent(SearchStudent.this, UserInfo.class);
             Bundle b = new Bundle();
             intent.putExtras(b);

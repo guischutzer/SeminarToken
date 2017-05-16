@@ -74,12 +74,13 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
         super.onCreate(savedInstanceState);
 
         Bundle b = getIntent().getExtras();
+        String type = b.getString("id");
         String nusp = b.getString("nusp");
         String pass = b.getString("pass");
         String name = b.getString("name");
 
         edit = b.getBoolean("edit");
-        seminar = nusp.equals("seminar");
+        seminar = userPath.equals("seminar/");
 
         if (seminar) {
             setContentView(R.layout.activity_register_seminar);
@@ -345,6 +346,7 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
                     Bundle b = new Bundle();
                     b.putString("nusp", nusp);
                     b.putString("pass", pass);
+                    b.putString("type", "seminar");
                     intent.putExtras(b);
                     startActivity(intent);
                     return true;

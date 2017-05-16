@@ -15,7 +15,7 @@ public class RegisterSeminar extends RegisterStudent {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         setPath("seminar/");
+        super.onCreate(savedInstanceState);
     }
 }
