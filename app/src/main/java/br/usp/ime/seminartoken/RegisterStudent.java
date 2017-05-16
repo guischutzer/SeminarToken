@@ -62,7 +62,12 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
     private EditText mNameView;
     private View mProgressView;
     private View mLoginFormView;
+    String userPath = "student/";
+    String actionPath = "add";
+    Boolean seminar = false;
     Boolean edit;
+
+    AutoCompleteTextView getMEmailView(){ return mEmailView; }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,14 +77,22 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
         String nusp = b.getString("nusp");
         String pass = b.getString("pass");
         String name = b.getString("name");
-        edit = b.getBoolean("edit");
-        Log.d("edit", edit.toString());
 
-        setContentView(R.layout.activity_register_student);
+        edit = b.getBoolean("edit");
+        seminar = nusp.equals("seminar");
+
+        if (seminar) {
+            setContentView(R.layout.activity_register_seminar);
+        } else {
+            setContentView(R.layout.activity_register_student);
+        }
         setupActionBar();
-        // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        mEmailView.setText(nusp, TextView.BufferType.EDITABLE);
+
+        if (!seminar) {
+            mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+            mEmailView.setText(nusp, TextView.BufferType.EDITABLE);
+        }
+
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setText(pass, TextView.BufferType.EDITABLE);
@@ -134,11 +147,12 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
         }
 
         // Reset errors.
-        mEmailView.setError(null);
+        if(!seminar) mEmailView.setError(null);
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
+        String email = "";
+        if (!seminar) mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
         String name = mNameView.getText().toString();
 
@@ -146,18 +160,18 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(password) && !seminar) {
             mPasswordView.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
             cancel = true;
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
+        if (TextUtils.isEmpty(email) && !seminar) {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
-        } else if (!TextUtils.isDigitsOnly(email)){
+        } else if (!TextUtils.isDigitsOnly(email) && !seminar){
             mEmailView.setError("Somente números");
             focusView = mEmailView;
             cancel = true;
@@ -193,7 +207,7 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
      * Shows the progress UI and hides the login form.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
+    void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
@@ -275,47 +289,62 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
         int IS_PRIMARY = 1;
     }
 
+    void setPath(String path){
+        userPath = path;
+    }
+
+    void setActionPath(String action){
+        actionPath = action;
+    }
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
     class UserRegistryTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mNusp;
-        private final String mPass;
-        private final String mName;
-        private String path = "student/add";
+        private final String nusp;
+        private final String pass;
+        private final String name;
 
         UserRegistryTask(String username, String name, String password) {
-            mNusp = username;
-            mName = name;
-            mPass = password;
-        }
-
-        void setPath(String path){
-            this.path = path;
+            this.nusp = username;
+            this.name = name;
+            this.pass = password;
         }
 
         @Override
         protected Boolean doInBackground(Void... args) {
 
             HashMap<String, String> params = new HashMap<String, String>();
-            params.put("nusp", mNusp);
-            params.put("name", mName);
-            params.put("pass", mPass);
+            if (!seminar) {
+                params.put("nusp", nusp);
+                params.put("pass", pass);
+            } else {
+                params.put("data", pass);
+            }
+            params.put("name", name);
 
             JSONObject jObj = null;
-            Log.d("pathSuper", path);
-            jObj = WebService.post(path, params);
-            Log.d("json", jObj.toString());
+            jObj = WebService.post(userPath + actionPath, params);
 
             try {
-                if((Boolean) jObj.get("success")) {
-                    // Manda para atividade do professor
+                if ((Boolean) jObj.get("success")) {
+
+                    if (userPath.equals("teacher/")) {
+                        return true;
+                    }
+
+                    if (seminar) {
+                        Intent intent = new Intent(RegisterStudent.this, SeminarInfo.class);
+                        startActivity(intent);
+                        return true;
+                    }
+
                     Intent intent = new Intent(RegisterStudent.this, StudentActivity.class);
                     Bundle b = new Bundle();
-                    b.putString("nusp", mNusp);
-                    b.putString("pass", mPass);
+                    b.putString("nusp", nusp);
+                    b.putString("pass", pass);
                     intent.putExtras(b);
                     startActivity(intent);
                     return true;
@@ -353,11 +382,12 @@ public class RegisterStudent extends AppCompatActivity implements LoaderCallback
 
     private class UserEditTask extends UserRegistryTask {
 
-
         UserEditTask(String username, String name, String password) {
             super(username, name, password);
-            setPath("student/edit");
+            setActionPath("edit");
         }
+
     }
+
 
 }

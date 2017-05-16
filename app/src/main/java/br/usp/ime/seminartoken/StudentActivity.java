@@ -22,35 +22,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StudentActivity extends AppCompatActivity {
+public class StudentActivity extends ListActivity {
 
     ListView list;
     String nusp;
     String pass;
-    String name;
 
-    void DisplaySeminarList() {
-
-        SeminarListTask listTask = new SeminarListTask();
-        listTask.execute((Void) null);
-        List<Seminar> seminars = null;
-        while (seminars == null) {
-            seminars = listTask.getList();
-        }
-
-        list = (ListView) findViewById(R.id.list);
-        ArrayListAdapter adapter;
-        ArrayList<String> arrayList = new ArrayList<String>();
-        for (Seminar seminar : seminars) {
-            String str = seminar.id + ": " + seminar.name + "\n";
-            if (!seminar.data.equals("null")) str = str + seminar.data;
-            arrayList.add(str);
-        }
-        adapter = new ArrayListAdapter(getBaseContext(),
-                                       android.R.layout.simple_list_item_1, arrayList);
-        Log.d("arrayList", arrayList.toString());
-        list.setAdapter(adapter);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -69,7 +46,6 @@ public class StudentActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.alter) {
 
-            Log.d("botao", "apertado");
             Intent intent = new Intent(StudentActivity.this, RegisterStudent.class);
 
             Bundle b = new Bundle();
@@ -77,7 +53,6 @@ public class StudentActivity extends AppCompatActivity {
             b.putString("pass", pass);
             b.putBoolean("edit", true);
 
-            Log.d("nusp", nusp);
             SimpleGetTask getStudent = new SimpleGetTask("student/get/" + nusp);
             getStudent.execute((Void) null);
 
@@ -101,25 +76,11 @@ public class StudentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        DisplayList("seminar");
+
         Bundle b = getIntent().getExtras();
         nusp = b.getString("nusp");
         pass = b.getString("pass");
-
-        setContentView(R.layout.activity_student);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        DisplaySeminarList();
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Intent intent = new Intent(StudentActivity.this, SearchSeminar.class);
-                startActivity(intent);
-            }
-        });
 
         list = (ListView) findViewById(R.id.list);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -140,8 +101,16 @@ public class StudentActivity extends AppCompatActivity {
             }
         });
 
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(StudentActivity.this, SearchSeminar.class);
+                startActivity(intent);
+            }
+        });
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
 }
+

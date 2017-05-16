@@ -1,8 +1,11 @@
 package br.usp.ime.seminartoken;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,7 +20,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -147,7 +152,6 @@ class SimpleGetTask extends AsyncTask<Void, Void, Boolean> {
 
     private String path;
     private JSONObject jObj = null;
-    private User user = null;
 
     SimpleGetTask(String path) {
         this.path = path;
@@ -178,8 +182,7 @@ class SimpleGetTask extends AsyncTask<Void, Void, Boolean> {
             String nusp = jObj.get("nusp").toString();
             String name = jObj.get("name").toString();
             String pass = jObj.get("pass").toString();
-            user = new User(nusp, name, pass);
-            return user;
+            return new User(nusp, name, pass);
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -189,6 +192,7 @@ class SimpleGetTask extends AsyncTask<Void, Void, Boolean> {
     Seminar parseSeminar() {
         if (jObj == null) return null;
         try {
+            jObj = (JSONObject) jObj.get("data");
             String id = jObj.get("id").toString();
             String name = jObj.get("name").toString();
             String data = jObj.get("data").toString();
@@ -199,6 +203,103 @@ class SimpleGetTask extends AsyncTask<Void, Void, Boolean> {
         }
     }
 
+}
+
+class GetListTask extends AsyncTask<Void, Void, Boolean> {
+
+    JSONObject jObj;
+    List<Seminar> seminars = null;
+    List<User> users = null;
+    String path = null;
+
+    GetListTask(String path) {
+        this.path = path;
+    }
+
+    List<Seminar> getSeminarList(){
+        return seminars;
+    }
+    List<User> getUserList(){
+        return users;
+    }
+
+    List<Seminar> parseSeminars(JSONObject jObj) {
+        JSONArray data = null;
+        try {
+            data = (JSONArray) jObj.get("data");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        List<Seminar> seminars = new ArrayList<Seminar>();
+
+        try {
+            int length = data.length();
+            for (int i = 0; i < length; i++) {
+                JSONObject jSeminar = (JSONObject) data.get(i);
+                Seminar seminar = new Seminar(jSeminar.get("id").toString(),
+                                              jSeminar.get("name").toString(),
+                                              jSeminar.get("data").toString());
+                seminars.add(seminar);
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return seminars;
+    }
+
+    List<User> parseUsers(JSONObject jObj) {
+        JSONArray data = null;
+        try {
+            data = (JSONArray) jObj.get("data");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        List<User> users = new ArrayList<User>();
+
+        try {
+            int length = data.length();
+            for (int i = 0; i < length; i++) {
+                JSONObject jUser = (JSONObject) data.get(i);
+                User user = new User(jUser.get("nusp").toString(),
+                                     jUser.get("name").toString(),
+                                     jUser.get("pass").toString());
+                users.add(user);
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return users;
+    }
+
+    @Override
+    protected Boolean doInBackground(Void... args) {
+
+        jObj = WebService.get(path);
+
+        try {
+            if((Boolean) jObj.get("success")) {
+                if (path.equals("seminar")) {
+                    seminars = parseSeminars(jObj);
+                }
+                else {
+                    users = parseUsers(jObj);
+                }
+                return true;
+            } else {
+                return false;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 
 }
 
@@ -224,4 +325,12 @@ class Seminar {
         this.name = name;
         this.data = data;
     }
+}
+
+class ArrayListAdapter extends ArrayAdapter {
+
+    ArrayListAdapter(Context context, int resource, List<String> list) {
+        super(context, resource, list);
+    }
+
 }

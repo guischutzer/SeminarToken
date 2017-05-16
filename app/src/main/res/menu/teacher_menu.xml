@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/alter"
+        android:title="Alterar Cadastro" />
+    <item
+        android:id="@+id/add_seminar"
+        android:title="Cadastrar Seminário" />
+    <item
+        android:id="@+id/list_students"
+        android:title="Listar Alunos" />
+    <item
+        android:id="@+id/list_teachers"
+        android:title="Listar Professores" />
+    <item
+        android:id="@+id/list_seminars"
+        android:title="Listar Seminários" />
+    <item
+        android:id="@+id/add_teacher"
+        android:title="Cadastrar Professor" />
+</menu>
